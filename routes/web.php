@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\NotificationController; // Importado para la Práctica 12
+use App\Http\Controllers\NotificationController; 
+use App\Http\Controllers\UsuarioController; 
 
 /**
  * 1. INICIO Y LOGIN
@@ -42,11 +43,9 @@ Route::middleware(['auth'])->group(function () {
 
     /**
      * PRÁCTICA 12: RUTAS DE NOTIFICACIONES
-     * Permite al usuario ver sus avisos y gestionarlos
      */
+    // Corregido: Se quitó el @if de Blade que causaba error
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    
-    // RUTA AÑADIDA: Marcar una notificación específica como leída
     Route::get('/notificaciones/{id}/leer', [NotificationController::class, 'leer'])->name('notificaciones.leer');
 
     /**
@@ -62,9 +61,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/productos/create', [ProductoController::class, 'create'])->name('productos.create');
         Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
         
-        // Estas rutas usan {id}, deben ir al final
         Route::get('/productos/{id}/edit', [ProductoController::class, 'edit'])->name('productos.edit');
         Route::put('/productos/{id}', [ProductoController::class, 'update'])->name('productos.update');
         Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
     });
 });
+
+/**
+ * NUEVA PRÁCTICA: CRUD DE USUARIOS (Paso 7 de la Guía)
+ */
+Route::resource('usuarios', UsuarioController::class);
