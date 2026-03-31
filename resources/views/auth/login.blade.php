@@ -1,46 +1,39 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - UPTex</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { text-align: center; color: #333; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #666; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn-login { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.3s; }
-        .btn-login:hover { background-color: #0056b3; }
-        .error-msg { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 20px; }
-        .info-roles { margin-top: 20px; font-size: 12px; color: #888; text-align: center; }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <h2>Sistemas Web <br><small>Práctica 6</small></h2>
+<x-guest-layout>
+    <div class="text-center mb-8 p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm">
+        <img src="{{ asset('img/logo-uptex.jpeg') }}" alt="Logo UPTex" class="mx-auto h-24 w-auto mb-4">
         
-        @if(session('error'))
-            <div class="error-msg">{{ session('error') }}</div>
-        @endif
-
-        <form action="{{ route('login.post') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label>Correo Electrónico</label>
-                <input type="email" name="email" placeholder="admin@uptex.edu.mx" required>
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" placeholder="********" required>
-            </div>
-            <button type="submit" class="btn-login">Ingresar al Sistema</button>
-        </form>
-
-        <div class="info-roles">
-            Acceso controlado por Middleware (Admin / Usuario)
-        </div>
+        <h1 class="text-3xl font-extrabold text-[#00602F] uppercase tracking-wider">
+            Universidad Politécnica de Texcoco
+        </h1>
+        <p class="text-gray-600 font-medium mt-1">
+            Sistemas Web | Práctica 13
+        </p>
     </div>
-</body>
-</html>
+
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
+    <form method="POST" action="{{ route('login') }}">
+        @csrf
+
+        <div>
+            <x-input-label for="email" value="Correo Institucional" />
+            <x-text-input id="email" class="block mt-1 w-full border-[#00602F] focus:border-[#C71C41] focus:ring-[#C71C41]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="password" value="Contraseña" />
+            <x-text-input id="password" class="block mt-1 w-full border-[#00602F] focus:border-[#C71C41] focus:ring-[#C71C41]"
+                            type="password"
+                            name="password"
+                            required autocomplete="current-password" />
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center justify-end mt-6">
+            <x-primary-button class="ms-3 bg-[#C71C41] hover:bg-[#A31835] focus:bg-[#A31835] active:bg-[#C71C41]">
+                Iniciar Sesión
+            </x-primary-button>
+        </div>
+    </form>
+</x-guest-layout>

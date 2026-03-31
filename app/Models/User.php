@@ -2,32 +2,32 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable; // Aquí se activa el sistema de notificaciones
+    use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Nombre de la tabla en la base de datos de la UPTex.
+     */
+    protected $table = 'usuarios'; //
+
+    /**
+     * Atributos asignables masivamente.
+     * Se usa 'nombre' en lugar de 'name'.
      */
     protected $fillable = [
-        'name',
+        'nombre', //
         'email',
         'password',
-        'rol', // Mantenemos el campo de la Práctica 6
+        'rol',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Atributos ocultos para la serialización.
      */
     protected $hidden = [
         'password',
@@ -35,15 +35,44 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Atributos virtuales que se añaden al JSON del modelo.
+     */
+    protected $appends = ['name'];
+
+    /**
+     * Conversión de tipos de atributos.
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            // Se comenta email_verified_at porque tu tabla no tiene esa columna
+            // 'email_verified_at' => 'datetime', 
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Accessor: Permite obtener el valor de 'nombre' usando $user->name.
+     * Esto evita errores en componentes internos de Laravel.
+     */
+    public function getNameAttribute()
+    {
+        return $this->nombre;
+    }
+
+    /**
+     * Mutator: Permite asignar un valor a 'nombre' usando $user->name = 'Valor'.
+     */
+    public function setNameAttribute($value)
+    {
+        $this->attributes['nombre'] = $value;
+    }
+
+    /**
+     * Indica a Laravel que el identificador de autenticación es 'id'.
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'id';
     }
 }

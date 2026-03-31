@@ -1,28 +1,45 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Usuarios Laravel + Git</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('usuarios.index') }}">
-                <i class="fas fa-users"></i> CRUD Usuarios
-            </a>
-            <a href="{{ route('usuarios.create') }}" class="btn btn-light">
-                <i class="fas fa-plus"></i> Nuevo Usuario
-            </a>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        @livewireStyles
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
+
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
+
+            <main>
+                {{-- 
+                   ESTA ES LA CORRECCIÓN:
+                   Sin {{ $slot }}, los componentes x-app-layout no muestran nada.
+                --}}
+                @isset($slot)
+                    {{ $slot }}
+                @endisset
+
+                {{-- Mantenemos yield por si usas vistas con @section('content') --}}
+                @yield('content')
+            </main>
         </div>
-    </nav>
 
-    <div class="container">
-        @yield('content')
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+        @livewireScripts
+    </body>
 </html>

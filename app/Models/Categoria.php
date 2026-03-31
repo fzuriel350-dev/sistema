@@ -10,7 +10,7 @@ class Categoria extends Model
     use HasFactory;
 
     // Esto permite guardar cualquier dato desde Tinker o formularios
-    protected $guarded = [];
+    protected $fillable = ['nombre', 'descripcion'];
 
     public function productos()
     {

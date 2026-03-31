@@ -13,11 +13,13 @@
         "barryvdh/laravel-dompdf": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "livewire/livewire": "*",
         "maatwebsite/excel": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/boost": "2.0",
+        "laravel/breeze": "*",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "laravel/sail": "^1.41",
@@ -86,6 +88,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "abandoned": "ignore"
         }
     },
     "minimum-stability": "stable",

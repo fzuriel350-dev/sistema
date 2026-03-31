@@ -12,33 +12,32 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * El password actual utilizado por el factory.
      */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Define el estado por defecto del modelo.
+     * Ajustado específicamente para la tabla 'usuarios'.
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            // 'nombre' evita el QueryException de "no column named name"
+            'nombre'         => fake()->name(), 
+            'email'          => fake()->unique()->safeEmail(),
+            'password'       => static::$password ??= Hash::make('password'),
+            'rol'            => 'usuario', // Valor por defecto para las pruebas de autorizacion [cite: 79]
             'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Estado para usuarios sin verificar.
+     * Se deja vacío ya que tu tabla no cuenta con la columna email_verified_at.
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn (array $attributes) => []);
     }
 }

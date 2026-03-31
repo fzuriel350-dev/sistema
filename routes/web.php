@@ -1,73 +1,71 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductoController; 
+use App\Http\Controllers\CarritoController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
-use App\Http\Controllers\ProductoController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\NotificationController; 
-use App\Http\Controllers\UsuarioController; 
+use Illuminate\Support\Facades\Auth;
+use App\Models\ActivityLog;
 
-/**
- * 1. INICIO Y LOGIN
- */
-Route::get('/', function () { 
-    return redirect()->route('login'); 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Redirección inicial al login
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+// Ruta del dashboard (Breeze)
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-/**
- * 2. RUTA DE DIAGNÓSTICO DE CORREO
- */
-Route::get('/test-mail', function () {
-    try {
-        Mail::raw('Hola, esta es una prueba de Mailtrap desde Uptex', function ($message) {
-            $message->to('prueba@ejemplo.com')
-                    ->subject('Prueba de Conexión Mailtrap');
-        });
-        return "¡Correo enviado con éxito! Revisa tu bandeja de entrada en Mailtrap.";
-    } catch (\Exception $e) {
-        return "Error detallado al enviar: " . $e->getMessage();
-    }
+// Cierre de sesión manual para depuración
+Route::get('/force-logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
 });
 
-/**
- * 3. RUTAS PROTEGIDAS POR AUTENTICACIÓN
- */
-Route::middleware(['auth'])->group(function () {
+// Rutas protegidas por autenticación 
+Route::middleware('auth')->group(function () {
     
-    // Lista de productos
-    Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+    // --- PRÁCTICA 15: HISTORIAL DE ACTIVIDAD ---
+    Route::get('/historial', function () {
+        $logs = ActivityLog::with('user')->latest()->paginate(15);
+        return view('logs.index', compact('logs'));
+    })->name('logs.index');
 
-    /**
-     * PRÁCTICA 12: RUTAS DE NOTIFICACIONES
-     */
-    // Corregido: Se quitó el @if de Blade que causaba error
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notificaciones/{id}/leer', [NotificationController::class, 'leer'])->name('notificaciones.leer');
+    // --- REPORTES Y EXPORTACIÓN (Prácticas 11 y 16) ---
+    Route::get('productos/exportar/pdf', [ProductoController::class, 'exportPdf'])->name('productos.pdf');
+    Route::get('productos/exportar/excel', [ProductoController::class, 'exportExcel'])->name('productos.excel');
+    Route::post('/reportes/csv', [ProductoController::class, 'exportarCsv'])->name('reportes.csv'); 
 
-    /**
-     * PRÁCTICA 11: RUTAS DE EXPORTACIÓN (PDF Y EXCEL)
-     */
-    Route::get('/productos/descargar-pdf', [ProductoController::class, 'exportPdf'])->name('productos.pdf');
-    Route::get('/productos/descargar-excel', [ProductoController::class, 'exportExcel'])->name('productos.excel');
+    // --- PRÁCTICA 18: CARRITO DE COMPRAS CON SESSION --- [cite: 120]
+    Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index'); // [cite: 124]
+    Route::post('/carrito/{producto}', [CarritoController::class, 'agregar'])->name('carrito.agregar'); // [cite: 127]
+    Route::patch('/carrito/{id}', [CarritoController::class, 'actualizar'])->name('carrito.actualizar'); // [cite: 129]
+    Route::delete('/carrito/{id}', [CarritoController::class, 'eliminar'])->name('carrito.eliminar'); // [cite: 130]
+    Route::delete('/carrito', [CarritoController::class, 'vaciar'])->name('carrito.vaciar'); // 
 
-    /**
-     * 4. RUTAS SOLO PARA ADMIN (PRÁCTICA 6)
-     */
-    Route::middleware(['checkRol:admin'])->group(function () {
-        Route::get('/productos/create', [ProductoController::class, 'create'])->name('productos.create');
-        Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
-        
-        Route::get('/productos/{id}/edit', [ProductoController::class, 'edit'])->name('productos.edit');
-        Route::put('/productos/{id}', [ProductoController::class, 'update'])->name('productos.update');
-        Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])->name('productos.destroy');
-    });
+    // --- PRÁCTICA 19: LIVEWIRE (Componentes Dinámicos) --- [cite: 160]
+    // Generalmente Livewire no requiere rutas adicionales si los componentes 
+    // se embeben en vistas existentes, pero puedes crear una página dedicada:
+    Route::get('/interactivo', function () {
+        return view('interactivo.index'); 
+    })->name('livewire.index');
+
+    // Rutas del Perfil de Usuario
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // CRUD de Productos
+    Route::resource('productos', ProductoController::class);
 });
 
-/**
- * NUEVA PRÁCTICA: CRUD DE USUARIOS (Paso 7 de la Guía)
- */
-Route::resource('usuarios', UsuarioController::class);
+require __DIR__.'/auth.php';
